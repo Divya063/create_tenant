@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -10,8 +11,7 @@ import (
 	tenclient "sigs.k8s.io/multi-tenancy/poc/tenant-controller/pkg/clients/tenants/clientset/v1alpha1/typed/tenants/v1alpha1/"
 )
 
-var d rest.Interface
-var idk rest.Interface
+var demo rest.Interface
 
 type tenants struct {
 	client rest.Interface
@@ -23,19 +23,35 @@ func (c *tenants) Get(name string, options v1.GetOptions) (result *v1alpha1.Tena
 		Resource("tenants").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
-		Do().
+		Do(context.TODO()).
+		Into(result)
+	return
+}
+
+func (c *tenants) Create(string name, tenant *v1alpha1.Tenant) (result *v1alpha1.Tenant, err error) {
+	result = &v1alpha1.Tenant{}
+	err = c.client.Post().
+		Resource("tenants").
+		Name(name).
+		Body(tenant).
+		Do(context.TODO()).
 		Into(result)
 	return
 }
 
 func main() {
 
-	c := tenclient.New(d)
-	idk = c.RESTCLIENT()
+	c := tenclient.New(demo)
+	demoClient := c.RESTCLIENT()
 
 	t := &tenants{
-		client: idk,
+		client: demoClient,
 	}
+
+	tenant * v1alpha1.Tenant
+
+	result, err := t.Create("do-something", tenant)
+	fmt.Println(result, err.Error())
 
 	tenants, err := t.Get("do-something", v1.GetOptions{})
 	fmt.Println(tenants, err.Error())
